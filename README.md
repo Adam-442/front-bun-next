@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Welcome To BunFrontend
 
-First, run the development server:
+This is the Front-End for the the challenge.
+Check out the Back-end [**Here**](https://github.com/Adam-442/bunbackend).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Terminal
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+    bun install
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+To run app, (http://localhost:5500):
 
-## Learn More
+    bun --bun run dev
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Work Summary
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+The front-end has the main features of what is needed, and is easy to expand upon. Features include:
 
-## Deploy on Vercel
+ 1. Uploading CSV files to backend.
+ 2. Fetching data from backend and showing them as a list.
+ 3. Adding certain data types to the backend (like activities and permissions).
+ 
+ ## Screenshots:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Landing Page:**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+<img width="1440" alt="Landing Page" src="https://github.com/Adam-442/front-bun-next/assets/98691783/474ac2ab-1c7d-4433-8c36-72edd0726406">
+<br/>
+
+**Available Options:**
+
+<img width="552" alt="Available Options" src="https://github.com/Adam-442/front-bun-next/assets/98691783/e175cd4b-4a43-486b-89d0-4b9ac5a7768e">
+<br/>
+
+
+**Uploaded CSV, the backend responded with a timer for inserting data:**
+
+<img width="998" alt="Uploaded CSV" src="https://github.com/Adam-442/front-bun-next/assets/98691783/b1f56a01-c512-4970-8646-df2e07f8f973">
+<br/>
+
+
+**The "*Get All Requests*" and how it is displayed as a list of values:**
+
+<img width="1440" alt="Get All Requests" src="https://github.com/Adam-442/front-bun-next/assets/98691783/3c3ad610-ba8a-42e5-804d-aa6fcf3cb34a">
+<br/>
+
+
+***Adding* an *Activity* with the name "*Programming*", the backend sends back a response with the ID of the added activity:**
+
+<img width="801" alt="Add Activity" src="https://github.com/Adam-442/front-bun-next/assets/98691783/5836d6e5-dc31-4975-82bb-130906d56590">
+<br/>
+
+
+**When calling "*Get All Activities*", we can see the reflected changes, and the "Programming" activity here after we added it from the previous action:**
+
+<img width="1440" alt="Get All Activities" src="https://github.com/Adam-442/front-bun-next/assets/98691783/fe2f37df-5155-46c7-ac07-981d4d5644d9">
+<br/>
+
+
+**When an action needs a parameter to work, the page will display an input field for the user to write:**
+
+<img width="1362" alt="Get an account permission" src="https://github.com/Adam-442/front-bun-next/assets/98691783/4a290c59-8d8a-44de-a176-7462b3ebdaa1">
+<br/>
+
+## Packages, Libraries and frameworks
+
+ - [**BunJS:**](https://bun.sh/) JavaScript Runtime, faster than NodeJS.
+ - [**NextJS:**](https://nextjs.org/) React-based web application with static website generation.
+ - [**TypeScript:**](https://www.typescriptlang.org/) JavaScript with static typing and optional type annotations.
+ - [**csv2json:**](https://www.npmjs.com/package/csvjson-csv2json) *NPM* package that parses *CSV* strings to *JSON*.
