@@ -10,7 +10,7 @@ To install dependencies:
 
     bun install
 
-To run app, (http://localhost:5500):
+To run app, (http://localhost:3000):
 
     bun --bun run dev
 
