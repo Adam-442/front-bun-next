@@ -1,113 +1,132 @@
-import Image from 'next/image'
+'use client';
+import csv2json from 'csvjson-csv2json';
+import { FormEvent, useEffect, useState } from "react";
+
+function MyLI(props: {content: string}) {
+  return <li className="outline-1 outline-slate-600 outline-dashed">{props.content}</li>
+}
+
+const parameters = {
+  "/uploadData": "",
+  "/getAllRequests": "",
+  "/getRequest/": "RequestID",
+  "/getAllAccounts": "",
+  "/getAccount/": "RequestID",
+  "/getAllActivityRequests": "",
+  "/getActivityRequest/": "RequestID",
+  "/getAccountPermissions/": "AccountID",
+  "/addPermission/": "Permission Name",
+  "/getAllPermissions": "",
+  "/getCompanyActivities/": "ActivityRequestID",
+  "/addActivity/": "Activity Name",
+  "/getAllActivities": "",
+}
 
 export default function Home() {
+  const [file, setFile] = useState<File>();
+  const [value, setValue] = useState('/getAllRequests');
+  const parameter = parameters[value as keyof typeof parameters];
+  const [status, setStatus] = useState('');
+  const [json, setJson] = useState<string | undefined>(undefined);
+  const [results, setResults] = useState<JSON[]>([]);
+
+  useEffect(() => {
+    if (value === '/uploadData' && file) {
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = async (event) => {
+        const csvText = event.target?.result as string;
+        if (!csvText) {
+          setStatus('Error: CSV not valid');
+          return
+        };
+        const jsonData = csv2json(csvText, {parseNumbers: true, parseJSON: true});
+        setJson(JSON.stringify(jsonData));
+      };
+    }    
+  }, [file]);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setStatus('Wait..')
+ 
+    // get data from FORM
+    const formData = new FormData(event.currentTarget)    
+    let link = `${formData.get('select')}`;
+    let method = 'POST';
+
+    // If link has parameter, add it
+    if (link[link.length-1]==='/') {
+      link = link.concat(`${formData.get('parameter')}`)
+    }
+
+    // change method depending on the option selected
+    if (link.includes('/get')) {
+      method = 'GET';
+    }
+
+    // Send request
+    const response = await fetch(`http://localhost:5500${link}`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: value === '/uploadData'? json: undefined,
+    })
+    .then(res => res.text())
+    .then(text => {
+      try {
+        const data = JSON.parse(text);
+        if (data.length === 0) setStatus('No Results');
+        else setStatus('Success');
+        setResults(data);
+      } catch (e) {
+        setStatus(text);
+      }
+    });
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <main className="flex h-screen flex-col items-center justify-center p-14">
+      <p className="text-xs">Made By <i className="hover:text-purple-500 transition-colors"><a href="https://github.com/Adam-442/" target="_blank">Adam Abu Saab</a></i></p>
+      <h1 className="font-bold mb-8 text-5xl">Welcome!</h1>
+      <div className="">
+        <form onSubmit={onSubmit} className="flex gap-2">
+          <label className="font-bold text-center py-3">Choose an option:</label>
+          <select name="select" id="form_selector" className="text-gray-700 font-bold cursor-pointer rounded px-1" value={value} onChange={(e) => {setValue(e.target.value)}}>
+            <optgroup label="Requests-Related">
+              <option value="/uploadData">Upload CSV</option>
+              <option value="/getAllRequests">Get All Requests</option>
+              <option value="/getRequest/">Get a Request</option>
+              <option value="/getAllAccounts">Get All Accounts</option>
+              <option value="/getAccount/">Get an Account</option>
+              <option value="/getAllActivityRequests">Get All Activity Requests</option>
+              <option value="/getActivityRequest/">Get an Activity Request</option>
+            </optgroup>
+            <optgroup label="Permissions-Related">
+              <option value="/getAccountPermissions/">Get an Account Permissions</option>
+              <option value="/addPermission/">Add Permission</option>
+              <option value="/getAllPermissions">Get All Permissions</option>
+            </optgroup>
+            <optgroup label="Activities-Related">
+              <option value="/getCompanyActivities/">Get a Company Activities</option>
+              <option value="/addActivity/">Add an Activity</option>
+              <option value="/getAllActivities">Get All Activities</option>
+            </optgroup>
+          </select>
+          <input type="text" name="parameter" placeholder={parameter} className="text-gray-700 font-bold rounded px-3" hidden={parameter === ''}/>
+          <input type="file" id="uploadfile" name="uploadfile" className="py-2" accept="excel/*,.csv" onChange={(e)=> e.target.files?.length? setFile(e.target.files[0]): null} hidden={value != '/uploadData'}/>
+          <button type="submit" className="bg-purple-700 hover:bg-purple-500 transition-colors font-bold py-1 px-4 rounded">Submit</button>
+        </form>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <p className="font-bold text-slate-300 mt-3">{status}</p>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div className="m-4 overflow-scroll flex-grow outline-1 outline-purple-600 outline-dashed w-full">
+        <ul id="jsonList" className="flex flex-col gap-2 px-3 py-1">
+          {results.map(result => JSON.stringify(result) ).map((Fresult) => <MyLI key={Fresult} content={Fresult}/>)}
+        </ul>
       </div>
     </main>
-  )
+  );
 }
